@@ -719,6 +719,22 @@ function App() {
       sounds.background.pause();
     }
   };
+   // Start new game
+   const startGame = () => {
+    setScore(0);
+    setLives(3);
+    setLevel(1);
+    setGameOver(false);
+    setGameStarted(true);
+    
+    lasersRef.current = [];
+    asteroidsRef.current = [];
+    explosionsRef.current = [];
+    
+    if (sounds.background) {
+      sounds.background.play();
+    }
+  };
   return (
     <>
 <div className="w-full h-screen bg-black overflow-hidden relative">
