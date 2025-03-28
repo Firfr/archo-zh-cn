@@ -1,6 +1,13 @@
+import React, { useEffect, useState, useRef } from 'react';
 
 function App() {
-
+    // Game state
+    const [gameStarted, setGameStarted] = useState(false);
+    const [gameOver, setGameOver] = useState(false);
+    const [score, setScore] = useState(0);
+    const [lives, setLives] = useState(3);
+    const [level, setLevel] = useState(1);
+    
   return (
     <>
 <div className="w-full h-screen bg-black overflow-hidden relative">
