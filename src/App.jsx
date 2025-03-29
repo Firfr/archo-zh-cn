@@ -104,6 +104,44 @@ function App() {
     starsRef.current = newStars;
     
   }, []);
+
+  // Initialize game
+  useEffect(() => {
+    if (!gameStarted || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const ctx = canvas.getContext('2d');
+    ctxRef.current = ctx;
+    
+    // Reset game state
+    const ship = shipRef.current;
+    ship.x = canvas.width / 2;
+    ship.y = canvas.height / 2;
+    ship.dx = 0;
+    ship.dy = 0;
+    ship.rotation = 0;
+    ship.invulnerable = false;
+    
+    lasersRef.current = [];
+    asteroidsRef.current = [];
+    explosionsRef.current = [];
+    
+    // Create initial asteroids
+    createAsteroids(level);
+    
+    // Start game loop
+    lastTimeRef.current = performance.now();
+    requestRef.current = requestAnimationFrame(gameLoop);
+    
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [gameStarted, level]);
   return (
     <>
 <div className="w-full h-screen bg-black overflow-hidden relative">
