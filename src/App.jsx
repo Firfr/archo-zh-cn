@@ -142,6 +142,38 @@ function App() {
       }
     };
   }, [gameStarted, level]);
+    
+  // Handle keyboard input
+  useEffect(() => {
+    if (!gameStarted) return;
+    
+    const handleKeyDown = (e) => {
+      keysRef.current[e.key] = true;
+      
+      // Fire laser on spacebar
+      if (e.key === ' ' && !gameOver) {
+        fireLaser();
+      }
+    };
+    
+    const handleKeyUp = (e) => {
+      keysRef.current[e.key] = false;
+      
+      // Stop thrust sound when releasing thrust key
+      if ((e.key === 'ArrowUp' || e.key === 'w') && sounds.thrust) {
+        sounds.thrust.pause();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [gameStarted, gameOver, sounds]);
+  
   return (
     <>
 <div className="w-full h-screen bg-black overflow-hidden relative">
