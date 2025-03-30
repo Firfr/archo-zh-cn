@@ -174,6 +174,105 @@ function App() {
     };
   }, [gameStarted, gameOver, sounds]);
   
+  // Fire laser from ship
+  const fireLaser = () => {
+    const ship = shipRef.current;
+    
+    // Calculate laser starting position at ship's nose
+    const angle = ship.rotation;
+    const offsetX = Math.sin(angle) * ship.width/2;
+    const offsetY = -Math.cos(angle) * ship.height/2;
+    
+    lasersRef.current.push({
+      x: ship.x + offsetX,
+      y: ship.y + offsetY,
+      dx: Math.sin(angle) * 10,
+      dy: -Math.cos(angle) * 10,
+      size: 3,
+      life: 50 // Laser lifetime in frames
+    });
+    
+    // Play laser sound
+    if (sounds.laser) {
+      sounds.laser.play();
+    }
+  };
+  
+  // Split asteroid into smaller pieces
+  const splitAsteroid = (asteroid, index) => {
+    const asteroids = asteroidsRef.current;
+    
+    // Remove original asteroid
+    asteroids.splice(index, 1);
+    
+    // Play explosion sound
+    if (sounds.explosion) {
+      sounds.explosion.play();
+    }
+    
+    // Create explosion effect
+    explosionsRef.current.push({
+      x: asteroid.x,
+      y: asteroid.y,
+      size: asteroid.size,
+      life: 20, // Duration of explosion
+      particles: createExplosionParticles(asteroid)
+    });
+    
+    // Split into smaller asteroids if large enough
+    if (asteroid.size > 25) {
+      const numPieces = Math.floor(Math.random() * 2) + 2; // 2-3 pieces
+      
+      for (let i = 0; i < numPieces; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 2 + 1;
+        
+        asteroids.push({
+          x: asteroid.x,
+          y: asteroid.y,
+          size: asteroid.size / 2,
+          dx: Math.cos(angle) * speed,
+          dy: Math.sin(angle) * speed,
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.04,
+          points: generateAsteroidPoints(asteroid.size / 2),
+          type: 'small'
+        });
+      }
+    }
+    
+    // Increase score based on asteroid size
+    setScore(prev => prev + Math.floor(asteroid.size));
+    
+    // Check if all asteroids are destroyed
+    if (asteroids.length === 0) {
+      // Move to next level
+      setLevel(prev => prev + 1);
+    }
+  };
+  
+  // Create explosion particles
+  const createExplosionParticles = (asteroid) => {
+    const particles = [];
+    const numParticles = Math.floor(asteroid.size / 2);
+    
+    for (let i = 0; i < numParticles; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 3 + 1;
+      
+      particles.push({
+        x: 0,
+        y: 0,
+        dx: Math.cos(angle) * speed,
+        dy: Math.sin(angle) * speed,
+        size: Math.random() * 3 + 1,
+        life: Math.random() * 30 + 10
+      });
+    }
+    
+    return particles;
+  };
+  
   return (
     <>
 <div className="w-full h-screen bg-black overflow-hidden relative">
