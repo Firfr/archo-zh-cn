@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-function App() {
-    // Game state
-    const [gameStarted, setGameStarted] = useState(false);
-    const [gameOver, setGameOver] = useState(false);
-    const [score, setScore] = useState(0);
-    const [lives, setLives] = useState(3);
-    const [level, setLevel] = useState(1);
-    
-    // Refs
+const App = () => {
+  // Game state
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [level, setLevel] = useState(1);
+  
+  // Refs
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const requestRef = useRef(null);
@@ -76,20 +76,23 @@ function App() {
       setImages(prev => ({...prev, background: backgroundImg}));
     };
     
-    // For a real game, you'd load actual audio files
-    const laserSound = { play: () => {laser.mp3} };
-    const explosionSound = { play: () => {elpl.mp3} };
-    const thrustSound = { play: () => {thrust.mp3}, pause: () => {} };
-    const gameOverSound = { play: () => {gameOver.mp3} };
-    const backgroundMusic = { play: () => {bgm.mp3}, pause: () => {} };
+    const laserSound = new Audio("laser.mp3");
+    const explosionSound = new Audio("explosion.mp3");
+    const thrustSound = new Audio("thrust.mp3");
+    const gameOverSound = new Audio("gameOver.mp3");
+    const backgroundMusic = new Audio("bgm.mp3");
     
-    setSounds({
-      laser: laserSound,
-      explosion: explosionSound,
-      thrust: thrustSound,
-      gameOver: gameOverSound,
-      background: backgroundMusic
-    });
+    backgroundMusic.loop = true; // Ensuring background music loops
+    
+    const sounds = {
+      laser: { play: () => laserSound.play() },
+      explosion: { play: () => explosionSound.play() },
+      thrust: { play: () => thrustSound.play(), pause: () => thrustSound.pause() },
+      gameOver: { play: () => gameOverSound.play() },
+      background: { play: () => backgroundMusic.play(), pause: () => backgroundMusic.pause() }
+    };
+    
+    setSounds(sounds);
     
     // Generate stars for background
     const newStars = [];
@@ -104,7 +107,7 @@ function App() {
     starsRef.current = newStars;
     
   }, []);
-
+  
   // Initialize game
   useEffect(() => {
     if (!gameStarted || !canvasRef.current) return;
@@ -142,7 +145,7 @@ function App() {
       }
     };
   }, [gameStarted, level]);
-    
+  
   // Handle keyboard input
   useEffect(() => {
     if (!gameStarted) return;
@@ -173,6 +176,58 @@ function App() {
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [gameStarted, gameOver, sounds]);
+  
+  // Create asteroids
+  const createAsteroids = (level) => {
+    const canvas = canvasRef.current;
+    const numAsteroids = level * 2 + 3; // More asteroids each level
+    
+    for (let i = 0; i < numAsteroids; i++) {
+      // Create asteroids away from the ship
+      let x, y;
+      do {
+        x = Math.random() * canvas.width;
+        y = Math.random() * canvas.height;
+      } while (
+        Math.sqrt(
+          Math.pow(x - shipRef.current.x, 2) + 
+          Math.pow(y - shipRef.current.y, 2)
+        ) < 200
+      );
+      
+      const size = Math.random() * 30 + 40; // 40-70 pixel asteroids
+      const speed = Math.random() * (0.5 + level * 0.1) + 0.5; // Faster with each level
+      const angle = Math.random() * Math.PI * 2;
+      
+      asteroidsRef.current.push({
+        x,
+        y,
+        size,
+        dx: Math.cos(angle) * speed,
+        dy: Math.sin(angle) * speed,
+        rotation: 0,
+        rotationSpeed: (Math.random() - 0.5) * 0.02,
+        points: generateAsteroidPoints(size),
+        type: 'large'
+      });
+    }
+  };
+  
+  // Generate random asteroid points for varied shapes
+  const generateAsteroidPoints = (size) => {
+    const numPoints = Math.floor(Math.random() * 5) + 8; // 8-12 points
+    const points = [];
+    
+    for (let i = 0; i < numPoints; i++) {
+      const angle = (i / numPoints) * Math.PI * 2;
+      const variation = (Math.random() * 0.3 + 0.8) * size / 2; // 80-110% of radius
+      const x = Math.cos(angle) * variation;
+      const y = Math.sin(angle) * variation;
+      points.push({x, y});
+    }
+    
+    return points;
+  };
   
   // Fire laser from ship
   const fireLaser = () => {
@@ -719,8 +774,9 @@ function App() {
       sounds.background.pause();
     }
   };
-   // Start new game
-   const startGame = () => {
+  
+  // Start new game
+  const startGame = () => {
     setScore(0);
     setLives(3);
     setLevel(1);
@@ -735,48 +791,49 @@ function App() {
       sounds.background.play();
     }
   };
+
   return (
     <div className="w-full h-screen bg-black overflow-hidden relative">
-    {/* Game canvas */}
-    <canvas 
-      ref={canvasRef}
-      className="w-full h-full absolute top-0 left-0"
-    />
-    
-    {/* Start Screen */}
-    {!gameStarted && (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 text-white">
-        <h1 className="text-6xl mb-6 font-bold">ASTEROIDS</h1>
-        <div className="mb-8 text-center max-w-md">
-          <p className="mb-4">Use WASD or arrow keys to control your ship.</p>
-          <p className="mb-4">Spacebar to shoot. Destroy all asteroids to advance to the next level.</p>
-          <p>Watch out! If your ship gets hit, you'll lose a life!</p>
+      {/* Game canvas */}
+      <canvas 
+        ref={canvasRef}
+        className="w-full h-full absolute top-0 left-0"
+      />
+      
+      {/* Start Screen */}
+      {!gameStarted && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 text-white">
+          <h1 className="text-6xl mb-6 font-bold">ARCHO</h1>
+          <div className="mb-8 text-center max-w-md">
+            <p className="mb-4">Use WASD or arrow keys to control your ship.</p>
+            <p className="mb-4">Spacebar to shoot. Destroy all asteroids to advance to the next level.</p>
+            <p>Watch out! If your ship gets hit, you'll lose a life!</p>
+          </div>
+          <button
+            className="px-8 py-4 bg-blue-600 text-white text-xl rounded-lg hover:bg-blue-700 transition"
+            onClick={startGame}
+          >
+            START GAME
+          </button>
         </div>
-        <button
-          className="px-8 py-4 bg-blue-600 text-white text-xl rounded-lg hover:bg-blue-700 transition"
-          onClick={startGame}
-        >
-          START GAME
-        </button>
-      </div>
-    )}
-    
-    {/* Game Over Screen */}
-    {gameOver && (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 text-white">
-        <h1 className="text-6xl mb-6 font-bold text-red-500">GAME OVER</h1>
-        <p className="text-3xl mb-6">Final Score: {score}</p>
-        <p className="text-xl mb-8">You reached level {level}</p>
-        <button
-          className="px-8 py-4 bg-blue-600 text-white text-xl rounded-lg hover:bg-blue-700 transition"
-          onClick={startGame}
-        >
-          PLAY AGAIN
-        </button>
-      </div>
-    )}
-  </div>
-  )
-}
+      )}
+      
+      {/* Game Over Screen */}
+      {gameOver && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 text-white">
+          <h1 className="text-6xl mb-6 font-bold text-red-500">GAME OVER</h1>
+          <p className="text-3xl mb-6">Final Score: {score}</p>
+          <p className="text-xl mb-8">You reached level {level}</p>
+          <button
+            className="px-8 py-4 bg-blue-600 text-white text-xl rounded-lg hover:bg-blue-700 transition"
+            onClick={startGame}
+          >
+            PLAY AGAIN
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
-export default App
+export default App;
