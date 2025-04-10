@@ -7,7 +7,7 @@ const App = () => {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [level, setLevel] = useState(1);
-  const [isPaused, SetIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   
   // Refs
   const canvasRef = useRef(null);
@@ -53,6 +53,11 @@ const App = () => {
     gameOver: null,
     background: null
   });
+  const isPausedRef = useRef(isPaused);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
   
   // Preload assets
   useEffect(() => {
@@ -106,9 +111,8 @@ const App = () => {
       });
     }
     starsRef.current = newStars;
-    
-  }, []);
-  
+}, []);  
+
   // Initialize game
   useEffect(() => {
     if (!gameStarted || !canvasRef.current) return;
@@ -156,9 +160,9 @@ const App = () => {
 
       //Handle pause
       if (e.key === 'Escape' || e.key === 'p') {
-        SetIsPaused(prev => !prev);
+        setIsPaused(prev => !prev);
       }
-      
+
       // Fire laser on spacebar
       if (e.key === ' ' && !gameOver && !isPaused) {
         fireLaser();
@@ -336,7 +340,7 @@ const App = () => {
   
   // Main game loop
   const gameLoop = (timestamp) => {
-    if (gameOver || isPaused) return;
+    if (gameOver) return;
     
     const delta = timestamp - lastTimeRef.current;
     lastTimeRef.current = timestamp;
@@ -356,7 +360,8 @@ const App = () => {
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-    
+
+    if (!isPausedRef.current){
     // Draw stars
     drawStars();
     
@@ -381,6 +386,7 @@ const App = () => {
     
     // Check for collisions
     checkCollisions();
+  };
     
     // Continue game loop
     requestRef.current = requestAnimationFrame(gameLoop);
@@ -792,8 +798,8 @@ const App = () => {
     setLives(3);
     setLevel(1);
     setGameOver(false);
-    setGameStarted(true)
-    SetIsPaused(false);
+    setGameStarted(true);
+    setIsPaused(false);
     
     lasersRef.current = [];
     asteroidsRef.current = [];
