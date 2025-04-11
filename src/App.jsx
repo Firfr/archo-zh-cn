@@ -794,6 +794,8 @@ const App = () => {
   
   // Start new game
   const startGame = () => {
+    setGameStarted(false)
+    setTimeout(() => {
     setScore(0);
     setLives(3);
     setLevel(1);
@@ -808,6 +810,7 @@ const App = () => {
     if (sounds.background) {
       sounds.background.play();
     }
+    }, 1)
   };
 
   return (
