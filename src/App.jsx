@@ -175,7 +175,7 @@ const App = () => {
       keysRef.current[e.key] = true;
 
       //Handle pause
-      if (e.key === 'Escape' || e.key === 'p') {
+      if (!gameOver && (e.key === 'Escape' || e.key === 'p')) {
         setIsPaused(prev => !prev);
       }
 
