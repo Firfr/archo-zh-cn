@@ -54,10 +54,26 @@ const App = () => {
     background: null
   });
   const isPausedRef = useRef(isPaused);
+  const livesRef = useRef(lives);
+  const scoreRef = useRef(score);
+  const levelRef = useRef(level);
 
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
+
+  useEffect(() => {
+    livesRef.current = lives;
+  }, [lives]);
+
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+
+  useEffect(() => {
+    levelRef.current = level;
+  }, [level]);
+
   
   // Preload assets
   useEffect(() => {
@@ -685,15 +701,15 @@ const App = () => {
     ctx.fillStyle = '#fff';
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(`Score: ${score}`, 20, 40);
+    ctx.fillText(`Score: ${scoreRef.current}`, 20, 40);
     
     // Level
-    ctx.fillText(`Level: ${level}`, 20, 70);
+    ctx.fillText(`Level: ${levelRef.current}`, 20, 70);
     
     // Lives
     ctx.fillText('Lives:', 20, 100);
     
-    for (let i = 0; i < lives; i++) {
+    for (let i = 0; i < livesRef.current; i++) {
       // Draw mini ships for lives
       ctx.save();
       ctx.translate(90 + i * 30, 95);
