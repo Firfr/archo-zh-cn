@@ -552,13 +552,13 @@ const useGameLoop = ({
     ctx.fillStyle = '#fff';
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(`Score: ${scoreRef.current}`, 20, 40);
+    ctx.fillText(`得分: ${scoreRef.current}`, 20, 40);
 
     // Level
-    ctx.fillText(`Level: ${levelRef.current}`, 20, 70);
+    ctx.fillText(`关卡: ${levelRef.current}`, 20, 70);
 
     // Lives
-    ctx.fillText('Lives:', 20, 100);
+    ctx.fillText('生命值:', 20, 100);
 
     for (let i = 0; i < livesRef.current; i++) {
       // Draw mini ships for lives
