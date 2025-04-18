@@ -1,0 +1,12 @@
+# git 配置
+.git/
+.github/
+
+# 编辑器配置
+.vscode/
+
+# 依赖模块
+node_modules/
+
+# 编译文件
+dist/
